@@ -26,10 +26,10 @@ async function readPromptFile(filename: string): Promise<string> {
 export async function buildSystemPrompt({ targetCountry, recipientGender }: SystemPromptParams): Promise<string> {
   const genderNote =
     recipientGender === "male"
-      ? 'Use "Brother" as the standard greeting.'
+      ? '수신자가 남성이므로 "Brother"를 기본 호칭으로 사용하세요.'
       : recipientGender === "female"
-      ? 'Use "Sister" as the standard greeting.'
-      : "Keep a neutral, respectful tone without gender-specific greetings.";
+      ? '수신자가 여성이므로 "Sister"를 기본 호칭으로 사용하세요.'
+      : "성별 정보가 없으므로 성별 특정 호칭 없이 중립적이고 존중하는 어조를 유지하세요.";
 
   const template = await readPromptFile("system.txt");
   return fill(template, { targetCountry, genderNote });
