@@ -77,18 +77,19 @@ export async function POST(request: NextRequest) {
   const outputLangNames = output_langs.map((code) => LANGUAGE_MAP[code]?.name ?? code).join(", ");
   const outputLangEnglishNames = output_langs.map((code) => LANGUAGE_MAP[code]?.englishName ?? code);
 
-  const systemInstruction = buildSystemPrompt({
-    targetCountry,
-    recipientGender: recipient_gender ?? "unspecified",
-  });
-
-  const userPrompt = buildTranslatePrompt({
-    inputLangName,
-    inputLangEnglishName,
-    outputLangNames,
-    outputLangEnglishNames,
-    text: text.trim(),
-  });
+  const [systemInstruction, userPrompt] = await Promise.all([
+    buildSystemPrompt({
+      targetCountry,
+      recipientGender: recipient_gender ?? "unspecified",
+    }),
+    buildTranslatePrompt({
+      inputLangName,
+      inputLangEnglishName,
+      outputLangNames,
+      outputLangEnglishNames,
+      text: text.trim(),
+    }),
+  ]);
 
   try {
     const geminiStream = await generateTranslationStream(systemInstruction, userPrompt);
