@@ -126,3 +126,38 @@ npm run dev
 |------|------|-----------|
 | `prompts/system.txt` | AI 페르소나·스타일 정의 | `{{targetCountry}}`, `{{genderNote}}` |
 | `prompts/translate.txt` | 번역 지시 | `{{inputLangName}}`, `{{inputLangEnglishName}}`, `{{outputLangNames}}`, `{{tagList}}`, `{{exampleOutput}}`, `{{text}}` |
+
+## 국가 목록 수정
+
+번역 대상자 국가 드롭다운 목록은 아래 파일에서 관리합니다.
+
+**수정 파일**: `constants/countries.ts`
+
+```ts
+export const COUNTRIES: Country[] = [
+  { code: "INTL", name: "전세계", englishName: "International" },
+  { code: "KR",   name: "한국",   englishName: "South Korea" },
+  // 추가할 국가를 여기에 입력
+  // { code: "국가코드", name: "한국어명", englishName: "영문명" },
+];
+
+// 기본 선택값 변경 시 code 값을 수정
+export const DEFAULT_RECIPIENT_COUNTRY = "INTL";
+```
+
+- `code`: 내부 식별자 (자유롭게 지정, 중복 없으면 됨)
+- `name`: UI에 표시되는 한국어 이름
+- `englishName`: AI 프롬프트에 전달되는 영문 이름 → 번역 문체에 영향
+
+## 지원 언어 목록 수정
+
+번역 입력/출력 언어 목록은 아래 파일에서 관리합니다.
+
+**수정 파일**: `constants/languages.ts`
+
+```ts
+export const LANGUAGES: Language[] = [
+  { code: "ko", name: "한국어", englishName: "Korean" },
+  // 추가할 언어를 여기에 입력
+];
+```
