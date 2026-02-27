@@ -6,7 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "해섬 번역기",
+  title: "다국어 번역기",
   description: "Gemini 2.5 Flash 기반 다국어 번역기",
 };
 

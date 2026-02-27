@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Languages, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 export default function RegisterPage() {
   const [userId, setUserId] = useState("");
@@ -53,7 +53,13 @@ export default function RegisterPage() {
       <Card className="w-full max-w-sm">
         <CardHeader className="space-y-1 text-center">
           <div className="flex justify-center mb-2">
-            <Languages className="h-8 w-8 text-primary" />
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+              <path d="M2 12h20" />
+              <path d="M12 2c-2.5 3-4 6.5-4 10s1.5 7 4 10" />
+              <path d="M12 2c2.5 3 4 6.5 4 10s-1.5 7-4 10" />
+            </svg>
           </div>
           <CardTitle className="text-2xl font-bold">회원가입</CardTitle>
           <CardDescription>사용할 아이디를 입력해주세요.</CardDescription>

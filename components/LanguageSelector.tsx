@@ -8,8 +8,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { X } from "lucide-react";
 import { LANGUAGES } from "@/constants/languages";
 
 interface LanguageSelectorProps {
@@ -32,12 +30,6 @@ export default function LanguageSelector({
       }
     } else {
       onOutputLangsChange([...outputLangs, code]);
-    }
-  }
-
-  function removeOutputLang(code: string) {
-    if (outputLangs.length > 1) {
-      onOutputLangsChange(outputLangs.filter((l) => l !== code));
     }
   }
 
@@ -85,26 +77,6 @@ export default function LanguageSelector({
           })}
         </div>
 
-        {outputLangs.length > 0 && (
-          <div className="mt-1 flex flex-wrap gap-1.5">
-            {outputLangs.map((code) => {
-              const lang = LANGUAGES.find((l) => l.code === code);
-              return (
-                <Badge key={code} variant="secondary" className="gap-1 pr-1">
-                  {lang?.name ?? code}
-                  <button
-                    type="button"
-                    onClick={() => removeOutputLang(code)}
-                    className="ml-0.5 rounded-full p-0.5 hover:bg-muted-foreground/20"
-                    aria-label={`${lang?.name} 제거`}
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </Badge>
-              );
-            })}
-          </div>
-        )}
       </div>
     </div>
   );
