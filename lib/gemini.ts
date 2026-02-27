@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const apiKey = process.env.GEMINI_API_KEY!;
-const MODEL_NAME = "gemini-2.0-flash-lite";
+const MODEL_NAME = "gemini-2.5-flash";
 
 export async function generateTranslationStream(
   systemInstruction: string,
