@@ -15,6 +15,19 @@ import { DEFAULT_INPUT_LANG, DEFAULT_OUTPUT_LANGS } from "@/constants/languages"
 import { DEFAULT_RECIPIENT_COUNTRY, DEFAULT_RECIPIENT_GENDER } from "@/constants/countries";
 import { Save, Settings } from "lucide-react";
 
+/** 스트리밍 중 완성된 [Tag]\n...\n 구간만 파싱 */
+function parseTranslationPartial(raw: string): ParsedTranslation {
+  const result: ParsedTranslation = {};
+  const regex = /\[([\w\s\-]+)\]\s*\n([\s\S]*?)(?=\n\[[\w\s\-]+\])/g;
+  let match;
+  while ((match = regex.exec(raw)) !== null) {
+    const langName = match[1].trim();
+    const text = match[2].trim();
+    if (langName && text) result[langName] = text;
+  }
+  return result;
+}
+
 export default function HomePage() {
   const [userId, setUserId] = useState<string | null>(null);
   const [inputText, setInputText] = useState("");
@@ -23,6 +36,7 @@ export default function HomePage() {
   const [recipientCountry, setRecipientCountry] = useState(DEFAULT_RECIPIENT_COUNTRY);
   const [recipientGender, setRecipientGender] = useState(DEFAULT_RECIPIENT_GENDER);
   const [parsed, setParsed] = useState<ParsedTranslation | null>(null);
+  const [streamingRaw, setStreamingRaw] = useState("");
   const [isTranslating, setIsTranslating] = useState(false);
   const [isSavingSettings, setIsSavingSettings] = useState(false);
   const [settingsLoaded, setSettingsLoaded] = useState(false);
@@ -99,6 +113,7 @@ export default function HomePage() {
 
     setIsTranslating(true);
     setParsed(null);
+    setStreamingRaw("");
 
     try {
       const res = await fetch("/api/translate", {
@@ -114,18 +129,40 @@ export default function HomePage() {
         }),
       });
 
-      const data = await res.json();
-
       if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
         toast({ description: data.error ?? "번역에 실패했습니다.", variant: "destructive" });
         return;
       }
 
-      setParsed(data.parsed);
+      const reader = res.body!.getReader();
+      const decoder = new TextDecoder();
+      let accumulated = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        accumulated += decoder.decode(value, { stream: true });
+        setStreamingRaw(accumulated);
+
+        // 완성된 [Tag]\n...\n 구간이 생길 때마다 파싱해서 점진적으로 표시
+        const partial = parseTranslationPartial(accumulated);
+        if (Object.keys(partial).length > 0) {
+          setParsed(partial);
+        }
+      }
+
+      // 스트림 완료 후 최종 파싱
+      const { parseTranslation } = await import("@/lib/parseTranslation");
+      const final = parseTranslation(accumulated);
+      if (Object.keys(final).length > 0) {
+        setParsed(final);
+      }
     } catch {
       toast({ description: "네트워크 오류가 발생했습니다.", variant: "destructive" });
     } finally {
       setIsTranslating(false);
+      setStreamingRaw("");
     }
   }
 
@@ -203,10 +240,19 @@ export default function HomePage() {
                 {Object.entries(parsed).map(([langName, text]) => (
                   <TranslationResultCard key={langName} langName={langName} text={text} />
                 ))}
+                {isTranslating && (
+                  <p className="text-xs text-muted-foreground animate-pulse px-1">번역 중...</p>
+                )}
               </div>
             ) : (
               <div className="flex h-[180px] items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground">
-                {isTranslating ? "번역 중..." : "번역 결과가 여기에 표시됩니다."}
+                {isTranslating && streamingRaw ? (
+                  <span className="animate-pulse">번역 중...</span>
+                ) : isTranslating ? (
+                  <span className="animate-pulse">Gemini에 요청 중...</span>
+                ) : (
+                  "번역 결과가 여기에 표시됩니다."
+                )}
               </div>
             )}
           </section>

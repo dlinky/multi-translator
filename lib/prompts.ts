@@ -3,9 +3,11 @@ interface SystemPromptParams {
   recipientGender: string;
 }
 
-interface TranslatePromptParams {
+export interface TranslatePromptParams {
   inputLangName: string;
+  inputLangEnglishName: string;
   outputLangNames: string;
+  outputLangEnglishNames: string[];
   text: string;
 }
 
@@ -30,14 +32,33 @@ ${genderNote}
 
 # IMPORTANT RULES:
 1. NEVER include explanatory phrases. ONLY output translated text.
-2. Output each language separated by its [Language] tag.`;
+2. NEVER output the source language text. Only output the requested translation languages.
+3. Output each translation language separated by its [EnglishLanguageName] tag.`;
 }
 
-export function buildTranslatePrompt({ inputLangName, outputLangNames, text }: TranslatePromptParams): string {
-  return `다음 ${inputLangName} 텍스트를 ${outputLangNames}로 번역해주세요.
-번역 결과는 [Korean], [English], [Telugu] 와 같이 각 언어별 구분자를 달아 출력하세요.
-원문에 포함된 이모지(😊, 🙏 등)와 문장표현(느낌표 !, 말줄임표 …, 물음표 ? 등 감정·강조를 나타내는 기호)은 그대로 살려서 번역해주세요.
+export function buildTranslatePrompt({
+  inputLangName,
+  inputLangEnglishName,
+  outputLangNames,
+  outputLangEnglishNames,
+  text,
+}: TranslatePromptParams): string {
+  const tagList = outputLangEnglishNames.map((n) => `[${n}]`).join(", ");
+  const exampleOutput = outputLangEnglishNames
+    .map((n) => `[${n}]\n(번역된 ${n} 텍스트)`)
+    .join("\n\n");
 
-텍스트:
+  return `다음 ${inputLangName} 텍스트를 ${outputLangNames}로 번역하세요.
+
+출력 규칙:
+1. 출력할 언어 태그(순서대로): ${tagList}
+2. [${inputLangEnglishName}] 태그는 절대 출력하지 마세요. 원문은 출력하지 않습니다.
+3. 이모지(😊, 🙏 등)와 감정 표현(!, …, ? 등)은 그대로 유지하세요.
+4. 설명이나 부가 문구 없이 번역 결과만 출력하세요.
+
+출력 형식 예시:
+${exampleOutput}
+
+번역할 텍스트:
 ${text}`;
 }
